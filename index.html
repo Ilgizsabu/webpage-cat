@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Без кота webpage не та</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css">
+    <style>
+      .user-block_form {
+        max-width: 400px;
+      }
+
+      .user-block_loader {
+        width: 22px;
+        height: 22px;
+        border: 5px dotted #f0050594;
+        border-radius: 50%;
+        display: inline-block;
+        position: relative;
+        box-sizing: border-box;
+        animation: rotation 2s linear infinite;
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      } 
+
+      .hidden-text::after {
+        display: none;
+      }
+      
+      .hidden {
+        display: none;
+      }
+
+      .result_error {
+        color: brown;
+      }
+    </style>
+</head>
+<body>
+  <form class="user-block user-block_form" method="GET">
+    <label for="user-block user-block_cat-select">Кошки</label>
+    <div class="user-block user-block_loader hidden"></div>
+    <select name="cat" class="user-block user-block_breed-select">
+      <option value="">-- Выберите породу --</option>
+    </select>
+  </form>
+  <div class="user-block user-block_image"></div>
+  <div class="result">
+    <p class="result result_text-result"></p>
+    <div class="result result_error"></div>
+  </div>
+  <script>
+    const userBlockCatSelect = document.querySelector('.user-block_breed-select');
+    const userBlockButton = document.querySelector('.user-block_button');
+    const userBlockLoader = document.querySelector('.user-block_loader');
+    const userBlockImage = document.querySelector('.user-block_image');
+    const resultError = document.querySelector('.result_error');
+    
+    userBlockCatSelect.addEventListener('change', (event) => {
+      event.preventDefault();
+      userBlockImage.innerHTML = '';
+      userBlockLoader.classList.remove('hidden');
+      
+      const selectBreed = userBlockCatSelect.value;
+      
+      fetch(`https://api.thecatapi.com/v1/images/${selectBreed}`)
+        .then((response) => response.json())
+        .then((data) => {
+          let imagesData = data;
+          let image = document.createElement('img');
+          image.src = `${imagesData.url}`;
+          userBlockImage.appendChild(image);
+        })
+        .catch((error) => {
+          resultError.textContent = error.message || 'Ошибка 404';
+        })
+        .finally(() => {
+          userBlockLoader.classList.add('hidden');
+        })
+    });
+    
+    const KEY = 'live_T7RsRHp0tSC0TPs5HTb14VrVptnKpn3O2TSC04jbNBNr6F4greSjyuDEm6Fnkn9I';
+    
+    fetch(`https://api.thecatapi.com/v1/breeds?${KEY}`, {
+    })
+      .then(response => response.json())
+      .then(result => {
+        for (const results of result) {
+          const userResults = results["name"];
+          const option = document.createElement('option');
+          userBlockCatSelect.appendChild(option);
+          option.text = userResults;
+          option.value = results.reference_image_id;
+        }
+      })
+      .catch((error) => {
+        resultError.textContent = error.message || 'Ошибка 404';
+      })
+  </script>
+</body>
+</html>
